@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Table Practice</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- External custom styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Game card -->
+    <div id="app" class="card bg-white p-6 sm:p-8 rounded-xl shadow-2xl transition duration-300 mx-auto mt-6 max-w-3xl">
+
+        <!-- Operation selector (moved above the scoreboard) -->
+        <div class="w-full mb-4">
+            <div id="operation-selector" class="mode-toggle inline-flex rounded-lg bg-gray-50 shadow-sm p-1">
+                <button class="mode-btn px-4 py-2 rounded-md text-sm font-semibold" data-mode="addition" aria-pressed="true">Addition</button>
+                <button class="mode-btn px-4 py-2 rounded-md text-sm font-semibold" data-mode="subtraction" aria-pressed="false">Subtraction</button>
+                <button class="mode-btn px-4 py-2 rounded-md text-sm font-semibold" data-mode="multiplication" aria-pressed="false">Multiplication</button>
+                <button class="mode-btn px-4 py-2 rounded-md text-sm font-semibold" data-mode="division" aria-pressed="false">Division</button>
+            </div>
+        </div>
+        
+        <!-- Scoreboard -->
+        <div class="flex justify-around items-center mb-8 p-4 bg-gray-100 rounded-lg shadow-inner">
+            <div class="text-center">
+                <p class="text-xs font-semibold uppercase text-gray-500">Correct</p>
+                <p id="correct-count" class="text-3xl font-bold text-emerald-600">0</p>
+            </div>
+            <div class="text-center">
+                <p class="text-xs font-semibold uppercase text-gray-500">Incorrect</p>
+                <p id="incorrect-count" class="text-3xl font-bold text-red-600">0</p>
+            </div>
+        </div>
+
+        <!-- Question Area -->
+        <div id="question-area" class="text-center mb-8">
+            <p class="text-5xl sm:text-7xl font-extrabold text-gray-800 transition-opacity duration-300" id="question-text">
+                -- x -- = ?
+            </p>
+        </div>
+
+        <!-- Input and Submit Form -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <input 
+                type="number" 
+                id="answer-input" 
+                placeholder="Your Answer" 
+                class="flex-1 p-3 sm:p-4 text-xl border-2 border-blue-300 rounded-lg focus:ring-4 focus:ring-blue-200 focus:border-blue-500 text-center font-bold transition"
+                autocomplete="off"
+            />
+            <button 
+                id="submit-button" 
+                class="submit-btn bg-black hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-md"
+            >
+                Submit
+            </button>
+        </div>
+
+        <!-- Feedback Message -->
+        <div id="feedback-container" class="mt-6 h-10 flex items-center justify-center">
+            <p id="feedback-message" class="text-lg font-semibold transition-all duration-300"></p>
+        </div>
+
+        <!-- History Log -->
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Past Questions</h2>
+            <div id="history-log" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                <!-- History items will be injected here -->
+                <p class="text-gray-400 text-center text-sm">Submit your first answer to start the log!</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- External script -->
+    <script src="app.js"></script>
+</body>
+</html>

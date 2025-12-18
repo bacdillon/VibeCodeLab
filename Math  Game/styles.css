@@ -1,0 +1,114 @@
+:root {
+    --primary-color: #3b82f6; /* blue-500 */
+    --correct-color: #10b981; /* emerald-500 */
+    --incorrect-color: #ef4444; /* red-500 */
+    --green-btn: #10b981;
+    --blue-btn: #3b82f6;
+}
+body {
+    font-family: 'Inter', sans-serif;
+    background: #000; /* solid black */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 1rem;
+}
+.card {
+    max-width: 680px;
+    width: 100%;
+}
+
+/* Buttons used in the new layout */
+.btn-submit-green {
+    background: linear-gradient(180deg, #22c55e, var(--green-btn));
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(16,185,129,0.18);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn-submit-green:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(16,185,129,0.18); }
+
+.btn-next-blue {
+    background: linear-gradient(180deg, #60a5fa, var(--blue-btn));
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(59,130,246,0.12);
+}
+.btn-next-blue:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(59,130,246,0.14); }
+
+/* Input styling */
+.controls input[type="number"] {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+/* Feedback message colors (kept dynamic via js classes) */
+#feedback-message.text-emerald-600 { color: var(--correct-color); }
+#feedback-message.text-red-600 { color: var(--incorrect-color); }
+
+/* Operation selector styles */
+.mode-toggle {
+    gap: 6px;
+}
+.mode-btn {
+    background: transparent;
+    color: #374151; /* gray-700 */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+/* hover for non-active buttons: light grey background, white text */
+.mode-btn:not([aria-pressed="true"]):hover {
+    background: #e5e7eb; /* light grey */
+    color: #ffffff; /* white text */
+}
+.mode-btn[aria-pressed="true"] {
+    background: linear-gradient(180deg,#f8fafc,#fff);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    border-radius: 8px;
+    color: #0f172a; /* darker text */
+}
+.mode-btn:focus {
+    outline: 2px solid rgba(59,130,246,0.25);
+    outline-offset: 2px;
+}
+
+/* small badge for mode in history items */
+.mode-badge {
+    display:inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight:600;
+    background: rgba(15,23,42,0.06);
+    color: #0f172a;
+}
+
+/* Style the scrollbar for the history log */
+#history-log::-webkit-scrollbar {
+    width: 8px;
+}
+#history-log::-webkit-scrollbar-thumb {
+    background-color: #d1d5db; /* gray-300 */
+    border-radius: 4px;
+}
+#history-log::-webkit-scrollbar-track {
+    background-color: #f3f4f6; /* gray-100 */
+}
+
+/* Animation for correct/incorrect feedback */
+.pulse-correct {
+    animation: pulse-correct 0.5s ease-out;
+}
+.pulse-incorrect {
+    animation: pulse-incorrect 0.5s ease-out;
+}
+@keyframes pulse-correct {
+    0% { background-color: var(--correct-color); transform: scale(1); }
+    50% { background-color: var(--correct-color); transform: scale(1.03); }
+    100% { background-color: white; transform: scale(1); }
+}
+@keyframes pulse-incorrect {
+    0% { background-color: var(--incorrect-color); transform: scale(1); }
+    50% { background-color: var(--incorrect-color); transform: scale(1.03); }
+    100% { background-color: white; transform: scale(1); }
+}

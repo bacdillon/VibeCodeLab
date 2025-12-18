@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Table Practice</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3b82f6; /* blue-500 */
+            --correct-color: #10b981; /* emerald-500 */
+            --incorrect-color: #ef4444; /* red-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .card {
+            max-width: 480px;
+            width: 100%;
+        }
+        /* Custom button styling for the game */
+        .submit-btn {
+            transition: all 0.15s ease-in-out;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .pulse-correct {
+            animation: pulse-correct 0.5s ease-out;
+        }
+        .pulse-incorrect {
+            animation: pulse-incorrect 0.5s ease-out;
+        }
+        @keyframes pulse-correct {
+            0% { background-color: var(--correct-color); transform: scale(1); }
+            50% { background-color: var(--correct-color); transform: scale(1.03); }
+            100% { background-color: white; transform: scale(1); }
+        }
+        @keyframes pulse-incorrect {
+            0% { background-color: var(--incorrect-color); transform: scale(1); }
+            50% { background-color: var(--incorrect-color); transform: scale(1.03); }
+            100% { background-color: white; transform: scale(1); }
+        }
+        /* Style the scrollbar for the history log */
+        #history-log::-webkit-scrollbar {
+            width: 8px;
+        }
+        #history-log::-webkit-scrollbar-thumb {
+            background-color: #d1d5db; /* gray-300 */
+            border-radius: 4px;
+        }
+        #history-log::-webkit-scrollbar-track {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="card bg-white p-6 sm:p-8 rounded-xl shadow-2xl transition duration-300">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Multiplication Table Trainer</h1>
+        
+        <!-- Scoreboard -->
+        <div class="flex justify-around items-center mb-8 p-4 bg-gray-100 rounded-lg shadow-inner">
+            <div class="text-center">
+                <p class="text-xs font-semibold uppercase text-gray-500">Correct</p>
+                <p id="correct-count" class="text-3xl font-bold text-emerald-600">0</p>
+            </div>
+            <div class="text-center">
+                <p class="text-xs font-semibold uppercase text-gray-500">Incorrect</p>
+                <p id="incorrect-count" class="text-3xl font-bold text-red-600">0</p>
+            </div>
+        </div>
+
+        <!-- Question Area -->
+        <div id="question-area" class="text-center mb-8">
+            <p class="text-5xl sm:text-7xl font-extrabold text-gray-800 transition-opacity duration-300" id="question-text">
+                -- x -- = ?
+            </p>
+        </div>
+
+        <!-- Input and Submit Form -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <input 
+                type="number" 
+                id="answer-input" 
+                placeholder="Your Answer" 
+                class="flex-1 p-3 sm:p-4 text-xl border-2 border-blue-300 rounded-lg focus:ring-4 focus:ring-blue-200 focus:border-blue-500 text-center font-bold transition"
+                autocomplete="off"
+            />
+            <button 
+                id="submit-button" 
+                class="submit-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-md"
+            >
+                Submit
+            </button>
+        </div>
+
+        <!-- Feedback Message -->
+        <div id="feedback-container" class="mt-6 h-10 flex items-center justify-center">
+            <p id="feedback-message" class="text-lg font-semibold transition-all duration-300"></p>
+        </div>
+
+        <!-- History Log -->
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Past Questions</h2>
+            <div id="history-log" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                <!-- History items will be injected here -->
+                <p class="text-gray-400 text-center text-sm">Submit your first answer to start the log!</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Global variables for game state
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let correctAnswer = 0;
+        let num1 = 0;
+        let num2 = 0;
+        let isChecking = false; // Flag to prevent rapid submissions
+        let historyLog = []; // Array to store history entries
+
+        // DOM element references
+        const correctCountEl = document.getElementById('correct-count');
+        const incorrectCountEl = document.getElementById('incorrect-count');
+        const questionTextEl = document.getElementById('question-text');
+        const answerInputEl = document.getElementById('answer-input');
+        const submitButtonEl = document.getElementById('submit-button');
+        const feedbackMessageEl = document.getElementById('feedback-message');
+        const appContainerEl = document.getElementById('app');
+        const historyLogEl = document.getElementById('history-log');
+
+        /**
+         * Updates the scoreboard display.
+         */
+        function updateScoreboard() {
+            correctCountEl.textContent = correctCount;
+            incorrectCountEl.textContent = incorrectCount;
+        }
+
+        /**
+         * Generates a new multiplication question.
+         * The factors will be between 1 and 12 (inclusive).
+         */
+        function generateQuestion() {
+            // Reset state
+            answerInputEl.value = '';
+            feedbackMessageEl.textContent = '';
+            appContainerEl.classList.remove('pulse-correct', 'pulse-incorrect');
+            answerInputEl.disabled = false;
+            submitButtonEl.disabled = false;
+            isChecking = false;
+            answerInputEl.focus();
+
+            // Generate two random numbers (1 to 12)
+            num1 = Math.floor(Math.random() * 12) + 1;
+            num2 = Math.floor(Math.random() * 12) + 1;
+            correctAnswer = num1 * num2;
+
+            // Display the new question
+            questionTextEl.textContent = `${num1} × ${num2} = ?`;
+        }
+        
+        /**
+         * Renders the history log, showing the most recent entries first.
+         */
+        function renderHistory() {
+            historyLogEl.innerHTML = ''; // Clear previous entries
+            
+            if (historyLog.length === 0) {
+                 historyLogEl.innerHTML = '<p class="text-gray-400 text-center text-sm">Submit your first answer to start the log!</p>';
+                 return;
+            }
+
+            historyLog.forEach((item) => {
+                const statusColor = item.isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800';
+                const statusIcon = item.isCorrect ? '✅' : '❌';
+                
+                const historyItem = document.createElement('div');
+                historyItem.className = `p-3 rounded-lg flex items-center justify-between ${statusColor}`;
+                
+                let textContent = `<span class="text-gray-500">${item.question} = </span>`;
+
+                if (item.isCorrect) {
+                    textContent += `<span class="font-bold">${item.userAnswer}</span>`;
+                } else {
+                    // Show user's incorrect answer crossed out, and then the correct answer
+                    textContent += `<span class="line-through mr-2">${item.userAnswer}</span><span class="font-bold">= ${item.correctAnswer}</span>`;
+                }
+                
+                historyItem.innerHTML = `
+                    <p class="font-medium text-sm sm:text-base">${textContent}</p>
+                    <span class="text-xl">${statusIcon}</span>
+                `;
+                
+                historyLogEl.appendChild(historyItem);
+            });
+        }
+
+        /**
+         * Checks the user's answer and updates the score and history.
+         */
+        function checkAnswer() {
+            if (isChecking) return; // Prevent double submission
+            isChecking = true;
+            
+            const userAnswer = parseInt(answerInputEl.value);
+            const questionString = `${num1} × ${num2}`;
+            const isCorrect = userAnswer === correctAnswer;
+            
+            // Basic validation
+            if (isNaN(userAnswer)) {
+                feedbackMessageEl.textContent = "Please enter a valid number.";
+                feedbackMessageEl.classList.remove('text-emerald-600', 'text-red-600');
+                feedbackMessageEl.classList.add('text-gray-500');
+                isChecking = false;
+                return;
+            }
+
+            // Log the history before updating counts
+            historyLog.unshift({ // Add to the start (most recent first)
+                question: questionString,
+                userAnswer: userAnswer,
+                correctAnswer: correctAnswer,
+                isCorrect: isCorrect
+            });
+
+            // Disable input and button while processing
+            answerInputEl.disabled = true;
+            submitButtonEl.disabled = true;
+
+            if (isCorrect) {
+                correctCount++;
+                feedbackMessageEl.textContent = "Correct! 🎉";
+                feedbackMessageEl.classList.remove('text-red-600', 'text-gray-500');
+                feedbackMessageEl.classList.add('text-emerald-600');
+                appContainerEl.classList.add('pulse-correct');
+            } else {
+                incorrectCount++;
+                feedbackMessageEl.textContent = `Incorrect. The answer was ${correctAnswer}.`;
+                feedbackMessageEl.classList.remove('text-emerald-600', 'text-gray-500');
+                feedbackMessageEl.classList.add('text-red-600');
+                appContainerEl.classList.add('pulse-incorrect');
+            }
+
+            // Update scoreboard, history, and generate the next question after a short delay
+            updateScoreboard();
+            renderHistory();
+            setTimeout(generateQuestion, 1500); // 1.5 seconds delay to see the feedback
+        }
+
+        // Event Listeners
+        submitButtonEl.addEventListener('click', checkAnswer);
+        answerInputEl.addEventListener('keypress', function(event) {
+            // Check for the Enter key (key code 13 or 'Enter')
+            if (event.key === 'Enter') {
+                checkAnswer();
+                event.preventDefault(); // Prevent default form submission behavior (if it was a form)
+            }
+        });
+
+        // Initialize the game when the window loads
+        window.onload = function() {
+            updateScoreboard();
+            renderHistory(); // Initialize the empty history display
+            generateQuestion();
+        };
+
+    </script>
+</body>
+</html>
